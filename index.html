@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compound Interest App</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #edeae5; --color-border: #d4d1ca; --color-text: #28251d; --color-text-muted: #7a7974; --color-text-inverse: #f9f8f4; --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8; --color-success: #437a22; --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px; --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06); --shadow-md: 0 8px 24px oklch(0.2 0.01 80 / 0.10); --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1); --font-body: 'Satoshi', Inter, sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d; --color-surface-offset: #22211f; --color-border: #393836; --color-text: #cdccca; --color-text-muted: #979591; --color-text-inverse: #171614; --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b; --color-success: #6daa45; --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2); --shadow-md: 0 8px 24px oklch(0 0 0 / 0.35);
+    }
+    * , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: none; text-size-adjust: none; scroll-behavior: smooth; }
+    body { min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text); background: radial-gradient(circle at top right, color-mix(in oklab, var(--color-primary) 10%, transparent), transparent 30%), var(--color-bg); line-height: 1.6; }
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .app-shell { max-width: 1100px; margin: 0 auto; padding: var(--space-6); }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); margin-bottom: var(--space-8); }
+    .brand { display:flex; align-items:center; gap:var(--space-3); font-size: var(--text-sm); font-weight:700; letter-spacing:0.02em; }
+    .brand svg { width: 32px; height: 32px; color: var(--color-primary); }
+    .theme-toggle { min-width:44px; min-height:44px; display:grid; place-items:center; border-radius:var(--radius-full); background: var(--color-surface); border:1px solid color-mix(in oklab, var(--color-text) 12%, transparent); box-shadow: var(--shadow-sm); }
+    .hero { display:grid; grid-template-columns: 1.15fr 0.85fr; gap: var(--space-6); align-items: stretch; }
+    .panel { background: color-mix(in oklab, var(--color-surface) 88%, white 12%); border:1px solid color-mix(in oklab, var(--color-text) 10%, transparent); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); }
+    .intro { padding: var(--space-8); display:flex; flex-direction:column; justify-content:space-between; min-height: 100%; }
+    .eyebrow { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-text-muted); margin-bottom: var(--space-3); }
+    h1 { font-size: var(--text-xl); line-height:1.1; max-width: 14ch; margin-bottom: var(--space-4); }
+    .intro p { color: var(--color-text-muted); max-width: 45ch; }
+    .stat-strip { display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); margin-top: var(--space-8); }
+    .stat { padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-surface-2); border:1px solid color-mix(in oklab, var(--color-text) 8%, transparent); }
+    .stat-label { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-1); }
+    .stat-value { font-size: var(--text-lg); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .calculator { padding: var(--space-8); }
+    .grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-4); }
+    .field { display:flex; flex-direction:column; gap: var(--space-2); }
+    .field label { font-size: var(--text-sm); font-weight: 600; }
+    .field input, .field select { min-height: 48px; padding: 0 var(--space-4); background: var(--color-surface-2); border:1px solid var(--color-border); border-radius: var(--radius-md); }
+    .results { margin-top: var(--space-6); padding: var(--space-5); background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface)); border-radius: var(--radius-lg); display:grid; gap: var(--space-4); }
+    .result-row { display:flex; align-items:end; justify-content:space-between; gap:var(--space-4); border-bottom:1px solid color-mix(in oklab, var(--color-text) 8%, transparent); padding-bottom: var(--space-3); }
+    .result-row:last-child { border-bottom:none; padding-bottom:0; }
+    .result-label { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .result-value { font-size: var(--text-lg); font-weight:700; font-variant-numeric: tabular-nums; text-align:right; }
+    .range-wrap { margin-top: var(--space-6); }
+    .range-head { display:flex; justify-content:space-between; gap:var(--space-4); margin-bottom:var(--space-3); font-size: var(--text-sm); color: var(--color-text-muted); }
+    .bar { height: 14px; border-radius: 999px; overflow:hidden; background: var(--color-surface-offset); }
+    .bar > span { display:block; height:100%; width:0%; background: linear-gradient(90deg, var(--color-success), var(--color-primary)); transition: width 300ms ease; }
+    .actions { display:flex; gap: var(--space-3); margin-top: var(--space-6); }
+    .btn { min-height: 44px; padding: 0 var(--space-4); border-radius: var(--radius-full); font-size: var(--text-sm); font-weight:700; display:inline-flex; align-items:center; justify-content:center; }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary { background: var(--color-surface-2); border:1px solid color-mix(in oklab, var(--color-text) 10%, transparent); }
+    .notes { margin-top: var(--space-6); color: var(--color-text-muted); font-size: var(--text-sm); }
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .stat-strip { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .app-shell { padding: var(--space-4); }
+      .intro, .calculator { padding: var(--space-6); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="sr-only" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Compound Interest App logo">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <rect x="4" y="24" width="8" height="18" rx="2" fill="currentColor" opacity="0.45"/>
+          <rect x="18" y="16" width="8" height="26" rx="2" fill="currentColor" opacity="0.7"/>
+          <rect x="32" y="8" width="8" height="34" rx="2" fill="currentColor"/>
+          <path d="M7 14C17 12 24 8 37 4" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span>Compound Interest</span>
+      </div>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </header>
+
+    <main id="main" class="hero">
+      <section class="panel intro" aria-labelledby="app-title">
+        <div>
+          <div class="eyebrow">Simple savings tool</div>
+          <h1 id="app-title">See how your money grows over time.</h1>
+          <p>Enter a starting amount, add monthly contributions, and compare your deposits with the effect of compounding.</p>
+        </div>
+        <div class="stat-strip" aria-label="Highlights">
+          <div class="stat"><div class="stat-label">Compounding</div><div class="stat-value" id="statFrequency">Monthly</div></div>
+          <div class="stat"><div class="stat-label">Projection</div><div class="stat-value" id="statYears">10 yrs</div></div>
+          <div class="stat"><div class="stat-label">Estimated gain</div><div class="stat-value" id="statInterest">€0</div></div>
+        </div>
+      </section>
+
+      <section class="panel calculator" aria-label="Compound interest calculator">
+        <form id="calcForm">
+          <div class="grid">
+            <div class="field">
+              <label for="principal">Initial amount</label>
+              <input id="principal" name="principal" type="number" min="0" step="100" value="10000" />
+            </div>
+            <div class="field">
+              <label for="monthly">Monthly contribution</label>
+              <input id="monthly" name="monthly" type="number" min="0" step="25" value="250" />
+            </div>
+            <div class="field">
+              <label for="rate">Annual interest rate (%)</label>
+              <input id="rate" name="rate" type="number" min="0" step="0.1" value="7" />
+            </div>
+            <div class="field">
+              <label for="years">Years</label>
+              <input id="years" name="years" type="number" min="1" step="1" value="10" />
+            </div>
+            <div class="field">
+              <label for="frequency">Compounding frequency</label>
+              <select id="frequency" name="frequency">
+                <option value="12" selected>Monthly</option>
+                <option value="4">Quarterly</option>
+                <option value="1">Yearly</option>
+                <option value="365">Daily</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="currency">Currency</label>
+              <select id="currency" name="currency">
+                <option value="EUR" selected>EUR (€)</option>
+                <option value="USD">USD ($)</option>
+                <option value="GBP">GBP (£)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="results" aria-live="polite">
+            <div class="result-row">
+              <div><div class="result-label">Final balance</div></div>
+              <div class="result-value" id="finalBalance">€0</div>
+            </div>
+            <div class="result-row">
+              <div><div class="result-label">Total contributions</div></div>
+              <div class="result-value" id="totalContributions">€0</div>
+            </div>
+            <div class="result-row">
+              <div><div class="result-label">Interest earned</div></div>
+              <div class="result-value" id="interestEarned">€0</div>
+            </div>
+          </div>
+
+          <div class="range-wrap">
+            <div class="range-head">
+              <span>How much comes from growth</span>
+              <span id="growthShareLabel">0%</span>
+            </div>
+            <div class="bar" aria-hidden="true"><span id="growthBar"></span></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Recalculate</button>
+            <button class="btn btn-secondary" type="button" id="resetBtn">Reset</button>
+          </div>
+
+          <p class="notes">Formula uses periodic compounding with monthly contributions distributed across the selected duration for a quick planning estimate.</p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const toggle = document.querySelector('[data-theme-toggle]');
+    let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    root.setAttribute('data-theme', currentTheme);
+
+    function setToggleIcon(theme) {
+      toggle.innerHTML = theme === 'dark'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      toggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+    }
+    setToggleIcon(currentTheme);
+    toggle.addEventListener('click', () => {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', currentTheme);
+      setToggleIcon(currentTheme);
+    });
+
+    const form = document.getElementById('calcForm');
+    const resetBtn = document.getElementById('resetBtn');
+    const frequencyNames = {1:'Yearly',4:'Quarterly',12:'Monthly',365:'Daily'};
+
+    const outputs = {
+      finalBalance: document.getElementById('finalBalance'),
+      totalContributions: document.getElementById('totalContributions'),
+      interestEarned: document.getElementById('interestEarned'),
+      growthBar: document.getElementById('growthBar'),
+      growthShareLabel: document.getElementById('growthShareLabel'),
+      statFrequency: document.getElementById('statFrequency'),
+      statYears: document.getElementById('statYears'),
+      statInterest: document.getElementById('statInterest')
+    };
+
+    function formatMoney(value, currency) {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
+    }
+
+    function calculate() {
+      const principal = Math.max(0, Number(form.principal.value) || 0);
+      const monthly = Math.max(0, Number(form.monthly.value) || 0);
+      const annualRate = Math.max(0, Number(form.rate.value) || 0) / 100;
+      const years = Math.max(1, Number(form.years.value) || 1);
+      const frequency = Math.max(1, Number(form.frequency.value) || 12);
+      const currency = form.currency.value;
+
+      const periods = frequency * years;
+      const periodicRate = annualRate / frequency;
+      const contributionPerPeriod = monthly * (12 / frequency);
+
+      let futurePrincipal = principal;
+      let futureContributions = 0;
+
+      if (periodicRate === 0) {
+        futurePrincipal = principal;
+        futureContributions = contributionPerPeriod * periods;
+      } else {
+        futurePrincipal = principal * Math.pow(1 + periodicRate, periods);
+        futureContributions = contributionPerPeriod * ((Math.pow(1 + periodicRate, periods) - 1) / periodicRate);
+      }
+
+      const finalBalance = futurePrincipal + futureContributions;
+      const totalContributions = principal + monthly * 12 * years;
+      const interestEarned = Math.max(0, finalBalance - totalContributions);
+      const growthShare = finalBalance > 0 ? (interestEarned / finalBalance) * 100 : 0;
+
+      outputs.finalBalance.textContent = formatMoney(finalBalance, currency);
+      outputs.totalContributions.textContent = formatMoney(totalContributions, currency);
+      outputs.interestEarned.textContent = formatMoney(interestEarned, currency);
+      outputs.growthBar.style.width = `${Math.min(100, growthShare).toFixed(1)}%`;
+      outputs.growthShareLabel.textContent = `${growthShare.toFixed(1)}%`;
+      outputs.statFrequency.textContent = frequencyNames[frequency] || `${frequency}x/yr`;
+      outputs.statYears.textContent = `${years} yrs`;
+      outputs.statInterest.textContent = formatMoney(interestEarned, currency);
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      calculate();
+    });
+
+    form.querySelectorAll('input, select').forEach((el) => {
+      el.addEventListener('input', calculate);
+      el.addEventListener('change', calculate);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      form.principal.value = 10000;
+      form.monthly.value = 250;
+      form.rate.value = 7;
+      form.years.value = 10;
+      form.frequency.value = 12;
+      form.currency.value = 'EUR';
+      calculate();
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
